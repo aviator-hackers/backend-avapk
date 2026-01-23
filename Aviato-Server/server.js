@@ -7,10 +7,10 @@ app.use(cors());
 app.use(express.json());
 
 // These are hidden in the .env file
-const VALID_CODE = process.env.ACTIVATION_CODE || "12345678";
+const VALID_CODE = process.env.ACTIVATION_CODE || "@Nakuru10254.dev";
 const LINKS = {
-  telegram: process.env.TELEGRAM_LINK || "https://t.me/your_secure_link",
-  whatsapp: process.env.WHATSAPP_LINK || "https://wa.me/your_secure_link"
+  telegram: process.env.TELEGRAM_LINK || "https://chat.whatsapp.com/ICuHNh1Oi6PBeCq5KhiNMu",
+  whatsapp: process.env.WHATSAPP_LINK || "https://chat.whatsapp.com/ICuHNh1Oi6PBeCq5KhiNMu"
 };
 
 // 1. Verify Activation Code
