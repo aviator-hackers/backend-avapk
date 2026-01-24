@@ -1,10 +1,20 @@
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
+const socketIO = require('socket.io');
 const multer = require('multer');
 const path = require('path');
 require('dotenv').config();
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIO(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
 app.use(cors());
 app.use(express.json());
 
@@ -43,6 +53,9 @@ const LINKS = {
   whatsapp: process.env.WHATSAPP_LINK || "https://chat.whatsapp.com/ICuHNh1Oi6PBeCq5KhiNMu"
 };
 
+// Store active sessions
+const activeSessions = new Map();
+
 // 1. Verify Activation Code
 app.post('/api/verify', (req, res) => {
   const { code } = req.body;
@@ -61,7 +74,7 @@ app.get('/api/links', (req, res) => {
   res.json(LINKS);
 });
 
-// 3. Image Upload Endpoint (THIS WAS MISSING!)
+// 3. Image Upload Endpoint
 app.post('/api/upload', upload.single('image'), (req, res) => {
   try {
     if (!req.file) {
@@ -77,7 +90,59 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
   }
 });
 
+// Socket.IO Connection Handling
+io.on('connection', (socket) => {
+  console.log('New client connected:', socket.id);
+
+  // When a user joins
+  socket.on('join', ({ sessionId, displayName }) => {
+    socket.join(sessionId);
+    activeSessions.set(socket.id, { sessionId, displayName, role: 'user' });
+    console.log(`${displayName} joined session ${sessionId}`);
+    
+    // Notify admin about new user
+    socket.to('admin-room').emit('user-joined', { sessionId, displayName });
+  });
+
+  // When admin joins
+  socket.on('join-admin', () => {
+    socket.join('admin-room');
+    activeSessions.set(socket.id, { role: 'admin' });
+    console.log('Admin joined');
+  });
+
+  // Handle messages (text or images)
+  socket.on('send-message', (data) => {
+    const { sessionId, displayName, text, imageUrl, senderRole } = data;
+    
+    const message = {
+      session_id: sessionId,
+      display_name: displayName,
+      text: text || '',
+      image_url: imageUrl || null,
+      sender_role: senderRole,
+      created_at: new Date().toISOString()
+    };
+
+    // Send to user's session
+    io.to(sessionId).emit('message', message);
+    
+    // Send to admin room
+    io.to('admin-room').emit('message', message);
+    
+    console.log(`Message from ${displayName}: ${text || '[Image]'}`);
+  });
+
+  socket.on('disconnect', () => {
+    const session = activeSessions.get(socket.id);
+    if (session) {
+      console.log(`${session.displayName || 'Client'} disconnected`);
+      activeSessions.delete(socket.id);
+    }
+  });
+});
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
