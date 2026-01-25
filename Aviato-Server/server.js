@@ -1,26 +1,30 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
-// Add to your server.js
-app.get('/api/check-version', (req, res) => {
-    res.json({
-        latestVersion: "1.0.1", // Set this to the version you want to FORCE
-        downloadUrl: "https://aviatorpredictor-v9.netlify.app/" 
-    });
-});
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Change this number whenever you release a new APK!
+const LATEST_VERSION = "1.0.1;
+
 // These are hidden in the .env file
-const VALID_CODE = process.env.ACTIVATION_CODE ;
+const VALID_CODE = process.env.ACTIVATION_CODE;
 const LINKS = {
   telegram: process.env.TELEGRAM_LINK || "https://t.me/your_secure_link",
   whatsapp: process.env.WHATSAPP_LINK || "https://wa.me/your_secure_link"
 };
 
-// 1. Verify Activation Code
+// Version check endpoint
+app.get('/api/check-version', (req, res) => {
+    res.json({
+        latestVersion: LATEST_VERSION,
+        downloadUrl: "https://aviatorpredictor-v9.netlify.app/" 
+    });
+});
+
+// Verify Activation Code
 app.post('/api/verify', (req, res) => {
   const { code } = req.body;
   
@@ -34,7 +38,7 @@ app.post('/api/verify', (req, res) => {
   }, 2000); // 2 second delay on server
 });
 
-// 2. Get Secure Links
+// Get Secure Links
 app.get('/api/links', (req, res) => {
   res.json(LINKS);
 });
