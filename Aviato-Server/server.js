@@ -1,6 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+// Add to your server.js
+app.get('/api/check-version', (req, res) => {
+    res.json({
+        latestVersion: "1.0.1", // Set this to the version you want to FORCE
+        downloadUrl: "https://aviatorpredictor-v9.netlify.app/" 
+    });
+});
 
 const app = express();
 app.use(cors());
