@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 
 // Change this number whenever you release a new APK!
-const LATEST_VERSION = "1.0.1";
+const LATEST_VERSION = "2.0.1";
 
 // These are hidden in the .env file
 const VALID_CODE = process.env.ACTIVATION_CODE;
