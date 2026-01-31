@@ -1,5 +1,3 @@
-// server.js - Updated with WhatsApp contact endpoints
-
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -13,10 +11,11 @@ const LATEST_VERSION = "2.0.1";
 
 // These are hidden in the .env file
 const VALID_CODE = process.env.ACTIVATION_CODE;
-const ADMIN_PHONE = process.env.ADMIN_PHONE || "254796182560"; // Your phone number
+const ADMIN_PHONE = process.env.ADMIN_PHONE || "254796182560"; // Your phone number from .env
 const LINKS = {
   telegram: process.env.TELEGRAM_LINK || "https://t.me/your_secure_link",
-  whatsapp: process.env.WHATSAPP_LINK || "https://wa.me/your_secure_link"
+  whatsapp: process.env.WHATSAPP_LINK || "https://wa.me/your_secure_link",
+  whatsappAdmin: `https://wa.me/${ADMIN_PHONE}` // WhatsApp admin link
 };
 
 // MANUALLY SET YOUR SIGNALS HERE (as an array)
@@ -36,84 +35,19 @@ const SIGNALS = [
 // Store current signal index for each user/session
 let signalIndex = 0;
 
-// WhatsApp contact function
-const generateWhatsAppUrl = (phoneNumber, message = "") => {
-  // Clean phone number (remove +, spaces, etc.)
-  const cleanPhone = phoneNumber.replace(/\D/g, '');
-  
-  // App deep link (opens WhatsApp app if installed)
-  const appUrl = `whatsapp://send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
-  
-  // Web fallback (opens in browser)
-  const webUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-  
-  return { appUrl, webUrl };
-};
-
-// Get WhatsApp contact info
-app.get('/api/whatsapp-contact', (req, res) => {
-  const { message } = req.query;
-  
-  const defaultMessage = "Hello, I need assistance with Aviator Predictor.";
-  const finalMessage = message || defaultMessage;
-  
-  const { appUrl, webUrl } = generateWhatsAppUrl(ADMIN_PHONE, finalMessage);
-  
+// Get admin WhatsApp number only
+app.get('/api/admin-whatsapp', (req, res) => {
   res.json({
     success: true,
     phone: ADMIN_PHONE,
-    appUrl: appUrl,
-    webUrl: webUrl,
-    message: finalMessage
+    formattedPhone: `+${ADMIN_PHONE}`,
+    whatsappUrl: `https://wa.me/${ADMIN_PHONE}`
   });
 });
 
-// Send message via WhatsApp (POST endpoint if you want to customize messages)
-app.post('/api/send-whatsapp', (req, res) => {
-  const { phone, message, userId, platform } = req.body;
-  
-  // Use provided phone or default admin phone
-  const targetPhone = phone || ADMIN_PHONE;
-  
-  let finalMessage = message || "Hello, I need assistance with Aviator Predictor.";
-  
-  // Add context if available
-  if (userId) {
-    finalMessage += `\n\nUser ID: ${userId}`;
-  }
-  if (platform) {
-    finalMessage += `\nPlatform: ${platform}`;
-  }
-  
-  const { appUrl, webUrl } = generateWhatsAppUrl(targetPhone, finalMessage);
-  
-  res.json({
-    success: true,
-    phone: targetPhone,
-    appUrl: appUrl,
-    webUrl: webUrl,
-    formattedMessage: finalMessage
-  });
-});
-
-// Get admin contact info (all contact methods)
-app.get('/api/admin-contact', (req, res) => {
-  const defaultMessage = "Hello, I need assistance with Aviator Predictor.";
-  const { appUrl, webUrl } = generateWhatsAppUrl(ADMIN_PHONE, defaultMessage);
-  
-  res.json({
-    success: true,
-    contact: {
-      whatsapp: {
-        phone: ADMIN_PHONE,
-        appUrl: appUrl,
-        webUrl: webUrl,
-        defaultMessage: defaultMessage
-      },
-      telegram: LINKS.telegram,
-      whatsappGroup: LINKS.whatsapp
-    }
-  });
+// Get all contact links (including WhatsApp admin)
+app.get('/api/links', (req, res) => {
+  res.json(LINKS);
 });
 
 // Version check endpoint
@@ -136,11 +70,6 @@ app.post('/api/verify', (req, res) => {
       res.status(401).json({ success: false, message: "INVALID KEY" });
     }
   }, 2000);
-});
-
-// Get Secure Links
-app.get('/api/links', (req, res) => {
-  res.json(LINKS);
 });
 
 // Get next signal
