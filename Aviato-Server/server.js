@@ -16,6 +16,24 @@ const LINKS = {
   whatsapp: process.env.WHATSAPP_LINK || "https://wa.me/your_secure_link"
 };
 
+// MANUALLY SET YOUR SIGNALS HERE (as an array)
+const SIGNALS = [
+  "2.91X",
+  "1.94X", 
+  "27.01X",
+  "1.01X",
+  "5.67X",
+  "12.45X",
+  "3.21X",
+  "8.76X",
+  "1.33X",
+  "45.89X"
+  // Add more signals as needed
+];
+
+// Store current signal index for each user/session
+let signalIndex = 0;
+
 // Version check endpoint
 app.get('/api/check-version', (req, res) => {
     res.json({
@@ -35,7 +53,7 @@ app.post('/api/verify', (req, res) => {
     } else {
       res.status(401).json({ success: false, message: "INVALID KEY" });
     }
-  }, 2000); // 2 second delay on server
+  }, 2000);
 });
 
 // Get Secure Links
@@ -43,7 +61,51 @@ app.get('/api/links', (req, res) => {
   res.json(LINKS);
 });
 
+// Get next signal
+app.get('/api/next-signal', (req, res) => {
+  if (SIGNALS.length === 0) {
+    return res.status(404).json({ 
+      success: false, 
+      message: "No signals available" 
+    });
+  }
+  
+  // Get current signal
+  const currentSignal = SIGNALS[signalIndex];
+  
+  // Move to next signal (loop back to start if at end)
+  signalIndex = (signalIndex + 1) % SIGNALS.length;
+  
+  res.json({ 
+    success: true, 
+    signal: currentSignal,
+    index: signalIndex,
+    total: SIGNALS.length
+  });
+});
+
+// Get all signals (for admin panel)
+app.get('/api/all-signals', (req, res) => {
+  res.json({
+    success: true,
+    signals: SIGNALS,
+    currentIndex: signalIndex,
+    total: SIGNALS.length
+  });
+});
+
+// Reset signal index (optional, for admin)
+app.post('/api/reset-signals', (req, res) => {
+  signalIndex = 0;
+  res.json({ 
+    success: true, 
+    message: "Signal index reset to 0" 
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Loaded ${SIGNALS.length} signals`);
+  console.log('Signals:', SIGNALS);
 });
