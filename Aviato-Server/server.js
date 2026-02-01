@@ -20,11 +20,11 @@ const LINKS = {
 
 // MANUALLY SET YOUR SIGNALS HERE (as an array)
 const SIGNALS = [
-  "2.91X",
-  "1.94X", 
-  "27.01X",
-  "1.01X",
-  "5.67X",
+  "1.57X",
+  "1.98X", 
+  "2.72X",
+  "1.09X",
+  "1.60X",
   "12.45X",
   "3.21X",
   "8.76X",
