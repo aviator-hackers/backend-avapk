@@ -11,7 +11,7 @@ const LATEST_VERSION = "3.0.1";
 
 // These are hidden in the .env file
 const VALID_CODE = process.env.ACTIVATION_CODE;
-const ADMIN_PHONE = process.env.ADMIN_PHONE || "254796182560"; // Your phone number from .env
+const ADMIN_PHONE = process.env.ADMIN_PHONE || "254750827334"; // Your phone number from .env
 const LINKS = {
   telegram: process.env.TELEGRAM_LINK || "https://t.me/your_secure_link",
   whatsapp: process.env.WHATSAPP_LINK || "https://wa.me/your_secure_link",
