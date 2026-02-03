@@ -20,16 +20,16 @@ const LINKS = {
 
 // MANUALLY SET YOUR SIGNALS HERE (as an array)
 const SIGNALS = [
-  "1.57X",
-  "1.98X", 
-  "2.72X",
-  "1.09X",
-  "1.60X",
-  "12.45X",
-  "3.21X",
-  "8.76X",
-  "1.33X",
-  "45.89X"
+  "1.19X",
+  "9.63X", 
+  "2.36X",
+  "16.84X",
+  "1.54X",
+  "6.07X",
+  "1.23X",
+  "48.92X",
+  "2.71X",
+  "8.19X"
 ];
 
 // Store current signal index for each user/session
